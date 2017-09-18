@@ -1,28 +1,95 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <title>Electron Boilerplate</title>
-  <link href="stylesheets/main.css" rel="stylesheet" type="text/css">
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Sixtyknobs Editor</title>
+
+    <link rel="stylesheet" href="stylesheets/main.css">
+
 </head>
 <body>
 
-  <div class="container">
-    <h1 id="greet"></h1>
-    <p>
-      Welcome to <a href="http://electron.atom.io" class="js-external-link">Electron</a> app running on this magnificent <strong id="os"></strong> machine.
-    </p>
-    <p>
-      App author: <strong id="author"></strong>
-    </p>
-    <p>
-      Environment: <strong id="env"></strong>
-    </p>
-    <p>
-      Electron version: <strong id="electron-version"></strong>
-    </p>
-  </div>
+<h1>60Knobs Editor</h1>
+<div id="content">
 
-  <script src="app.js"></script>
+<section id="knobs">
+	<header>Knob Settings</header>
+	<div>
+		<header>1</header>
+		<select class="type">
+			<option value="16"></option>
+			<option value="1" selected="selected">Control Change</option>
+			<option value="2">NRPN Biploar</option>
+			<option value="3">NRPN Uniploar</option>
+			<option value="4">DX7</option>
+			<option value="15">Control Change (extra Channel)</option>
+			<option value="18">NRPN Exponent</option>	
+		</select>
+		<table>
+			<tr>
+				<td>
+					<label></label>
+				</td>
+				<td>
+					<input type="number" data-tip="my title"/>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label></label>
+				</td>
+				<td>
+					<input type="number" />
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label>Invert Direction</label>
+				</td>
+				<td>
+					<input type="Checkbox" />
+				</td>
+			</tr>
+		</table>
+	</div>
+</section>
+
+<section id="globalsettings">
+	<header>Global Settings</header>
+	<span>
+		<label>MIDI Channel</label>
+		<input type="number" min="1" max="16" value="1"/>
+	</span>
+	<span>
+		<label>Drop NRPN LSB</label>
+		<input type="checkbox" />
+	</span>
+</section>
+
+<section id="send">
+	<header>Send to Device</header>
+	<span id="portselect">
+		<label>Select Port</label>
+		<select>
+		</select>
+	</span>
+	<span>
+		<label>Preset Number</label>
+		<select>
+			<option value="1">Preset 1</option>
+			<option value="2">Preset 2</option>
+			<option value="3">Preset 3</option>
+			<option value="4">Preset 4</option>
+		</select>
+	</span>
+</section>
+<button id="write">Send to Device</button>
+</div>
+
+<script src="app.js"></script>
 </body>
 </html>
+
