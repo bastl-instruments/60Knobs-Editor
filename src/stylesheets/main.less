@@ -1,22 +1,38 @@
-html, body {
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  padding: 0;
+section {
+	display:block;
+	height:100%;
+	clear:both;
+	margin-bottom: 30px;
+}
+section>header {
+	font-weight:bold;
+	margin-bottom:5px;
 }
 
-body {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-family: sans-serif;
-  color: #525252;
+#knobs div {
+	display:inline-table;
+	border: 1px solid black;
+	margin-right: 5px;
+	margin-bottom: 5px;
+	width: 180px;
+	height: 100px;
+}
+#knobs div header {
+	display:none;
+}
+#knobs select.type {
+	width: 100%;
+}
+#knobs tr {
+	height: 20px;
 }
 
-a {
-  text-decoration: none;
+#globalsettings, #send {
+	display: table;
 }
-
-.container {
-  text-align: center;
+#globalsettings span, #send span {
+	display: table-row;
+}
+#globalsettings span label, #globalSettings span input, #send span label, #send span input {
+	display: table-cell;
 }
