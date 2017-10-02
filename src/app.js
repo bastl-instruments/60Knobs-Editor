@@ -1,26 +1,35 @@
 const numbKnobs = 60;
 
 let $ = require('jquery');
+var ipcRenderer = require('electron').ipcRenderer;
 
+/*
+ * Main function
+ */
 $(function(){
 
 	createUI();
 
-	var ipcRenderer = require('electron').ipcRenderer;
 	ipcRenderer.on('midi_port_options', function (event,message) {
-	    setMIDIPortOptions(message);
+			setMIDIPortOptions(message);
 	});
 
-	var sendButton = $("button#write");
-	sendButton.on("click", sendMIDI);
+	$("button#write").on("click", sendMIDI);
 
 	$(document).on("change", "#knobs select.type", function(e) {
 		adaptKnobSettings($(e.target).parent());
 	});
-	
-	$.each($("#knobs>div"), function(key, value) {adaptKnobSettings($(value));});
+
+	$.each($("#knobs>div"), function(key, value) {
+		adaptKnobSettings($(value));
+	});
 });
 
+/*
+ * Adapt the form fields for a single knob depending on
+ * the type that is set for this knob
+ * Knob is passed as jquery reference to dom
+*/
 function adaptKnobSettings(knob) {
 	//console.log("Knob %o updated", knob.find("header").text());
 	var newType = knob.find("select.type")[0].value;
@@ -98,6 +107,13 @@ function adaptKnobSettings(knob) {
 		break;
 	}
 }
+
+/*
+ * Read form for a single knob and generate Sysex messsages
+ * that will set up the knob on the device like it is set in the editor
+ * Knob passed as jquery reference to dom
+ */
+
 function generateSysexFromKnobValue(knob) {
 	var id = parseInt(knob.find("header").text())-1;
 	var type = knob.find("select.type")[0].value;
@@ -114,7 +130,7 @@ function generateSysexFromKnobValue(knob) {
 	case "1":
 		knobMessagePayload.push(valOne);
 		knobMessagePayload.push(0);
-		break;		
+		break;
 	case "2":
 	case "3":
 		knobMessagePayload.push(LSHB(valOne));
@@ -126,11 +142,11 @@ function generateSysexFromKnobValue(knob) {
 		knobMessagePayload.push(LSHB(valOne));
 		knobMessagePayload.push(valTwo);
 		break;
-	
+
 	case "15":
 		knobMessagePayload.push(valOne);
 		knobMessagePayload.push(valTwo);
-	
+
 	case "16":
 		break;
 	case "18":
@@ -139,16 +155,20 @@ function generateSysexFromKnobValue(knob) {
 		knobMessagePayload.push(valTwo);
 	}
 
-	var invertMessagePayload = [17, id];	
+	var invertMessagePayload = [17, id];
 	if (valCheck) {
 		invertMessagePayload.push(1);
-	} else { 
+	} else {
 		invertMessagePayload.push(0);
-	}	
+	}
 
 	return [knobMessagePayload, invertMessagePayload];
 }
 
+
+/*
+ * Generate Sysex Messages for global settings
+ */
 function generateGlobalSysex() {
 	var channel = $("#globalsettings span:first-of-type input")[0].value;
 	var dropNRPNMSB = $("#globalsettings span:nth-of-type(2) input")[0].checked;
@@ -157,7 +177,7 @@ function generateGlobalSysex() {
 	var messages = [];
 	messages.push([9, channel]);
 	messages.push([5, presetID]);
-	
+
 	var dropNRPNMSBValue;
 	if (dropNRPNMSB) {
 		dropNRPNMSBValue = 1;
@@ -169,6 +189,10 @@ function generateGlobalSysex() {
 	return messages;
 }
 
+
+/*
+ * Just copies the first knob 59 times in dom
+ */
 function createUI() {
 	var knobContainer = $("#knobs");
 	var singleKnob = knobContainer.find("div:first-of-type");
@@ -179,10 +203,13 @@ function createUI() {
 	}
 }
 
+
+/*
+ * Fill selection field for the midi port with the
+ * options that are passed as an argument
+*/
 function setMIDIPortOptions(portOptions) {
-
-	console.log(portOptions);
-
+	//console.log(portOptions);
 	var portSelect = $("#portselect select");
 	portSelect.html("");
 	for (var i=0; i<portOptions.length; i++){
@@ -192,11 +219,14 @@ function setMIDIPortOptions(portOptions) {
 		portSelect.append(el);
 	}
 }
+
+
 function sendMIDI() {
-	console.log("Send MIDI");
+	console.log("Send MIDI from renderer");
 
 	var messages = [];
-	
+
+	// Add messages from all knobs
 	$.each($("#knobs>div"), function(key, value) {
 		var knobMessages = generateSysexFromKnobValue($(value));
 		$.each(knobMessages, function(mkey, mvalue) {
@@ -204,24 +234,33 @@ function sendMIDI() {
 		});
 	});
 
+  // Add messages from global setttings
 	messages = messages.concat(generateGlobalSysex());
 
+	// Add all Sysex start and end data to all messages
+	// and check for basic validity
 	var sysExStream = [];
 	$.each(messages, function(mkey, mvalue) {
-		sysExStream.push(240);
-		sysExStream.push(48);
+		var thisMessage = [];
+		thisMessage.push(240);
+		thisMessage.push(48);
 		$.each(mvalue, function(bkey, bvalue) {
 			bvalue = parseInt(bvalue);
 			if (bvalue < 127) {
-				sysExStream.push(bvalue);
+				thisMessage.push(bvalue);
 			} else {
 				console.log("Value out of range");
 			}
 		});
-		sysExStream.push(247);
+		thisMessage.push(247);
+		sysExStream.push(thisMessage);
 	});
 
-	console.log("Sysex Data %o", sysExStream);
+	// send port number and midi data to main process
+	ipcRenderer.send('send_midi_data', {
+			port: $("#portselect select")[0].value,
+			data: sysExStream
+	});
 }
 
 function MSHB(val) {
