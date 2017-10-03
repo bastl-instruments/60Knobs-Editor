@@ -6,20 +6,16 @@ const {dialog} = require('electron').remote;
 const loadJsonFile = require('load-json-file');
 const jetpack = require('fs-jetpack');
 
-var currentPreset = {};
+
+var currentPreset = null;
 var currentFilename = null;
 
-/*
- * Main function
- */
 $(function(){
 
-	// Intialize Interface
 	createUI();
 
-	$.each($("#knobs>div"), function(key, value) {
-		adaptKnobSettings($(value));
-	});
+	currentPreset = getCleanPreset();
+	updateUIFromPreset();
 
 	ipcRenderer.on('midi_port_options', function (event,message) {
 			setMIDIPortOptions(message);
@@ -33,10 +29,15 @@ $(function(){
 	$("button#storeSettings").on("click", storeSettingsToFile);
 
 	$(document).on("change", "#knobs select.type", function(e) {
-		adaptKnobSettings($(e.target).parent());
+		adaptKnobSettings($(e.target).parent(), true);
+		limitInputFieldsToRange();
 	});
 
 });
+
+/* ***********
+ * SAVE & LOAD
+**************/
 
 function loadSettingsFromFile() {
 	  var presetFilePath = dialog.showOpenDialog({
@@ -49,9 +50,13 @@ function loadSettingsFromFile() {
 				var data = loadJsonFile.sync(presetFilePath[0]);
 				currentPreset = data;
 				currentFilename = presetFilePath[0];
+				updateUIFromPreset();
 			}
 			catch(err) {
 				console.log("Not a valid settings file");
+				console.log(err);
+				currentPreset = null;
+				currentFilename = null;
 			}
 		}
 }
@@ -63,16 +68,220 @@ function storeSettingsToFile() {
 			buttonLabel: "Save Preset"
 		});
 		if (presetFilePath) {
+			updatePresetFromUI();
 			jetpack.write(presetFilePath, JSON.stringify(currentPreset, undefined, 4));
 		}
 }
 
+/*******
+ * MIDI
+ *******/
+
+function setMIDIPortOptions(portOptions) {
+	var portSelect = $("#portselect select");
+	portSelect.html("");
+	for (var i=0; i<portOptions.length; i++){
+		var el = $("<option></<option>");
+		el.text(portOptions[i]);
+		el.val(i);
+		portSelect.append(el);
+	}
+}
+
+function sendMIDI() {
+
+	updatePresetFromUI();
+	var messages = generateSysExFromPreset();
+	var sysExStream = messagePayloadToSysEx(messages);
+
+	// send port number and midi data to main process
+	ipcRenderer.send('send_midi_data', {
+			port: $("#portselect select")[0].value,
+			data: sysExStream
+	});
+}
+
+ function messagePayloadToSysEx(messages) {
+	 var sysExStream = [];
+	 $.each(messages, function(mkey, mvalue) {
+		 var thisMessage = [];
+		 // SysEx Start
+		 thisMessage.push(240);
+		 // Manufacturer ID
+		 thisMessage.push(48);
+		 // Payload
+		 $.each(mvalue, function(bkey, bvalue) {
+			 bvalue = parseInt(bvalue);
+			 if (bvalue < 127) {
+				 thisMessage.push(bvalue);
+			 } else {
+				 console.log("Value out of range");
+			 }
+		 });
+		 // SysEx Stop
+		 thisMessage.push(247);
+		 sysExStream.push(thisMessage);
+	 });
+	 return sysExStream;
+ }
+
+
+/* *************
+ * PRESET -> UI
+****************/
+
+function updateUIFromPreset() {
+	if (currentPreset) {
+
+		$.each($("#knobs>div"), function(key, value) {
+			var thisKnobSettings = currentPreset.knobs[parseInt(key)];
+			updateKnobFromPreset($(value), thisKnobSettings);
+		});
+
+		$("#globalsettings span:first-of-type input")[0].value = currentPreset.channel;
+		$("#globalsettings span:nth-of-type(2) input")[0].checked = currentPreset.dropNRPNMSB;
+		$("#send span:nth-of-type(2) select")[0].value = currentPreset.presetID;
+	}
+}
+
+function updateKnobFromPreset(UIElement, settings) {
+	var typeField = UIElement.find("select.type")[0];
+	var fieldOne = UIElement.find("tr:nth-of-type(1) input")[0];
+	var fieldTwo = UIElement.find("tr:nth-of-type(2) input")[0];
+	var checkbox = UIElement.find("tr:nth-of-type(3) input")[0];
+
+	typeField.value = settings.type;
+	fieldOne.value = settings.valOne;
+	fieldTwo.value = settings.valTwo;
+	checkbox.checked = settings.inverted;
+
+	adaptKnobSettings(UIElement, false);
+}
+
+
+/* *************
+ * UI -> PRESET
+****************/
+
+function updatePresetFromUI() {
+	currentPreset = {knobs: []};
+
+	$.each($("#knobs>div"), function(key, value) {
+		currentPreset.knobs.push(updatePresetFromKnob($(value)));
+	});
+
+	currentPreset.channel = $("#globalsettings span:first-of-type input")[0].value;
+	currentPreset.dropNRPNMSB = $("#globalsettings span:nth-of-type(2) input")[0].checked;
+	currentPreset.presetID = $("#send span:nth-of-type(2) select")[0].value;
+
+}
+
+function updatePresetFromKnob(UIElement) {
+	var typeField = UIElement.find("select.type")[0];
+	var fieldOne = UIElement.find("tr:nth-of-type(1) input")[0];
+	var fieldTwo = UIElement.find("tr:nth-of-type(2) input")[0];
+	var checkbox = UIElement.find("tr:nth-of-type(3) input")[0];
+
+	return {
+		type: typeField.value,
+		valOne: fieldOne.value,
+		valTwo: fieldTwo.value,
+		inverted: checkbox.checked
+	};
+}
+
+/* ***************
+ * PRESET -> SYSEX
+******************/
+
+function generateSysExFromPreset() {
+	var messages = [];
+
+	$.each(currentPreset.knobs, function(key, value) {
+		var id = key;
+		var type = value.type;
+		var valOne = value.valOne;
+		var valTwo = value.valTwo;
+		var valCheck = value.inverted;
+
+		var knobMessage = [type, id];
+
+		switch (type) {
+		// CC
+		case "1":
+			knobMessage.push(valOne);
+			knobMessage.push(0);
+			break;
+		// NPRN bipolar and unipolar
+		case "2":
+		case "3":
+			knobMessage.push(LSHB(valOne));
+			knobMessage.push(MSHB(valOne));
+			knobMessage.push(valTwo);
+			break;
+		// DX7
+		case "4":
+			knobMessage.push(MSHB(valOne));
+			knobMessage.push(LSHB(valOne));
+			knobMessage.push(valTwo);
+			break;
+		// CC on separate channel
+		case "15":
+			knobMessage.push(valOne);
+			knobMessage.push(valTwo);
+			break;
+		// disabled
+		case "16":
+			break;
+		// NPRN exponent
+		case "18":
+			knobMessage.push(LSHB(valOne));
+			knobMessage.push(MSHB(valOne));
+			knobMessage.push(valTwo);
+		}
+
+		var invertMessage = [17, id];
+		if (valCheck) {
+			invertMessage.push(1);
+		} else {
+			invertMessage.push(0);
+		}
+
+		messages.push(knobMessage);
+		messages.push(invertMessage);
+	});
+
+	messages.push([9, currentPreset.channel]);
+	messages.push([5, currentPreset.presetID]);
+
+	if (currentPreset.dropNRPNMSB) {
+		messages.push([19, 1]);
+	} else {
+		messages.push([19, 0]);
+	}
+
+	return messages;
+}
+
+/***********************
+ * MODIFY USER INTERFACE
+ ***********************/
+
+function createUI() {
+	var knobContainer = $("#knobs");
+	var singleKnob = knobContainer.find("div:first-of-type");
+	for (var i=1; i<numbKnobs; i++) {
+		var thisKnob = singleKnob.clone();
+		thisKnob.find("header").text((i+1).toString());
+		knobContainer.append(thisKnob);
+	}
+}
 /*
  * Adapt the form fields for a single knob depending on
  * the type that is set for this knob
  * Knob is passed as jquery reference to dom
 */
-function adaptKnobSettings(knob) {
+function adaptKnobSettings(knob, resetFieldValues) {
 
 	// Get form fields for this knob
 	var newType = knob.find("select.type")[0].value;
@@ -86,7 +295,7 @@ function adaptKnobSettings(knob) {
 		fieldOne.show().find('label').text("Index");
 		fieldOne.find('input').attr("min", 0);
 		fieldOne.find('input').attr("max", 127);
-		fieldOne.find('input').val(0);
+		if (resetFieldValues) fieldOne.find('input').val(0);
 		fieldTwo.hide();
 		checkbox.show();
 		break;
@@ -95,11 +304,11 @@ function adaptKnobSettings(knob) {
 		fieldOne.show().find('label').text("Index");
 		fieldOne.find('input').attr("min", 0);
 		fieldOne.find('input').attr("max", 16383);
-		fieldOne.find('input').val(0);
+		if (resetFieldValues) fieldOne.find('input').val(0);
 		fieldTwo.show().find('label').text("Range");
 		fieldTwo.find('input').attr("min", 1);
 		fieldTwo.find('input').attr("max", 63);
-		fieldTwo.find('input').val(63);
+		if (resetFieldValues) fieldTwo.find('input').val(63);
 		checkbox.show();
 		break;
 	// NPRN unipolar
@@ -107,11 +316,11 @@ function adaptKnobSettings(knob) {
 		fieldOne.show().find('label').text("Index");
 		fieldOne.find('input').attr("min", 0);
 		fieldOne.find('input').attr("max", 16383);
-		fieldOne.find('input').val(0);
+		if (resetFieldValues) fieldOne.find('input').val(0);
 		fieldTwo.show().find('label').text("Range");
 		fieldTwo.find('input').attr("min", 1);
 		fieldTwo.find('input').attr("max", 127);
-		fieldTwo.find('input').val(127);
+		if (resetFieldValues) fieldTwo.find('input').val(127);
 		checkbox.show();
 		break;
 	// DX7
@@ -119,11 +328,11 @@ function adaptKnobSettings(knob) {
 		fieldOne.show().find('label').text("Index");
 		fieldOne.find('input').attr("min", 0);
 		fieldOne.find('input').attr("max", 144);
-		fieldOne.find('input').val(0);
+		if (resetFieldValues) fieldOne.find('input').val(0);
 		fieldTwo.show().find('label').text("Range");
 		fieldTwo.find('input').attr("min", 1);
 		fieldTwo.find('input').attr("max", 9);
-		fieldTwo.find('input').val(9);
+		if (resetFieldValues) fieldTwo.find('input').val(9);
 		checkbox.show();
 		break;
 	// CC on separate channel
@@ -131,11 +340,11 @@ function adaptKnobSettings(knob) {
 		fieldOne.show().find('label').text("Index");
 		fieldOne.find('input').attr("min", 0);
 		fieldOne.find('input').attr("max", 127);
-		fieldOne.find('input').val(0);
+		if (resetFieldValues) fieldOne.find('input').val(0);
 		fieldTwo.show().find('label').text("Channel");
 		fieldTwo.find('input').attr("min", 1);
 		fieldTwo.find('input').attr("max", 16);
-		fieldTwo.find('input').val(1);
+		if (resetFieldValues) fieldTwo.find('input').val(1);
 		checkbox.show();
 		break;
 	// disabled
@@ -149,179 +358,53 @@ function adaptKnobSettings(knob) {
 		fieldOne.show().find('label').text("Index");
 		fieldOne.find('input').attr("min", 0);
 		fieldOne.find('input').attr("max", 16383);
-		fieldOne.find('input').val(0);
+		if (resetFieldValues) fieldOne.find('input').val(0);
 		fieldTwo.show().find('label').text("Range");
 		fieldTwo.find('input').attr("min", 1);
 		fieldTwo.find('input').attr("max", 4);
-		fieldTwo.find('input').val(1);
+		if (resetFieldValues) fieldTwo.find('input').val(1);
 		checkbox.show();
 		break;
 	}
 }
 
-/*
- * Read form for a single knob and generate Sysex messsages
- * that will set up the knob on the device like it is set in the editor
- * Knob passed as jquery reference to dom
- */
+/********
+ * HELPER
+ ********/
 
-function generateSysexFromKnobValue(knob) {
-	var id = parseInt(knob.find("header").text())-1;
-	var type = knob.find("select.type")[0].value;
-	var valOne = knob.find("tr:nth-of-type(1) input")[0].value;
-	var valTwo = knob.find("tr:nth-of-type(2) input")[0].value;
-	var valCheck = knob.find("tr:nth-of-type(3) input")[0].checked;
+function getCleanPreset() {
+	var thisPreset = {
+		channel: 1,
+		dropNRPNMSB: false,
+		presetID: 1,
+		knobs: []
+	};
 
-	//console.log("Extract knob %o", id);
-	//console.log("ID %o, Type %o", id, type);
-	//console.log("Vals: %o %o %o", valOne, valTwo, valCheck);
-
-	var knobMessagePayload = [type, id];
-	switch (type) {
-	// CC
-	case "1":
-		knobMessagePayload.push(valOne);
-		knobMessagePayload.push(0);
-		break;
-	// NPRN bipolar and unipolar
-	case "2":
-	case "3":
-		knobMessagePayload.push(LSHB(valOne));
-		knobMessagePayload.push(MSHB(valOne));
-		knobMessagePayload.push(valTwo);
-		break;
-	// DX7
-	case "4":
-		knobMessagePayload.push(MSHB(valOne));
-		knobMessagePayload.push(LSHB(valOne));
-		knobMessagePayload.push(valTwo);
-		break;
-	// CC on separate channel
-	case "15":
-		knobMessagePayload.push(valOne);
-		knobMessagePayload.push(valTwo);
-		break;
-	// disabled
-	case "16":
-		break;
-	// NPRN exponent
-	case "18":
-		knobMessagePayload.push(LSHB(valOne));
-		knobMessagePayload.push(MSHB(valOne));
-		knobMessagePayload.push(valTwo);
-	}
-
-	var invertMessagePayload = [17, id];
-	if (valCheck) {
-		invertMessagePayload.push(1);
-	} else {
-		invertMessagePayload.push(0);
-	}
-
-	return [knobMessagePayload, invertMessagePayload];
-}
-
-
-/*
- * Generate Sysex Messages for global settings
- */
-function generateGlobalSysex() {
-	var channel = $("#globalsettings span:first-of-type input")[0].value;
-	var dropNRPNMSB = $("#globalsettings span:nth-of-type(2) input")[0].checked;
-	var presetID = $("#send span:nth-of-type(2) select")[0].value;
-
-	var messages = [];
-	messages.push([9, channel]);
-	messages.push([5, presetID]);
-
-	var dropNRPNMSBValue;
-	if (dropNRPNMSB) {
-		dropNRPNMSBValue = 1;
-	} else {
-		dropNRPNMSBValue = 0;
-	}
-	messages.push([19, dropNRPNMSBValue]);
-
-	return messages;
-}
-
-
-/*
- * Just copies the first knob 59 times in dom
- */
-function createUI() {
-	var knobContainer = $("#knobs");
-	var singleKnob = knobContainer.find("div:first-of-type");
-	for (var i=1; i<numbKnobs; i++) {
-		var thisKnob = singleKnob.clone();
-		thisKnob.find("header").text((i+1).toString());
-		knobContainer.append(thisKnob);
-	}
-}
-
-
-/*
- * Fill selection field for the midi port with the
- * options that are passed as an argument
-*/
-function setMIDIPortOptions(portOptions) {
-	var portSelect = $("#portselect select");
-	portSelect.html("");
-	for (var i=0; i<portOptions.length; i++){
-		var el = $("<option></<option>");
-		el.text(portOptions[i]);
-		el.val(i);
-		portSelect.append(el);
-	}
-}
-
-
-function sendMIDI() {
-	var messages = [];
-
-	// Add messages from all knobs
-	$.each($("#knobs>div"), function(key, value) {
-		var knobMessages = generateSysexFromKnobValue($(value));
-		$.each(knobMessages, function(mkey, mvalue) {
-			messages.push(mvalue);
+	for (var i=0; i<numbKnobs; i++) {
+		thisPreset.knobs.push({
+			type: 1,
+			valOne: i,
+			valTwo: 0,
+			inverted: false,
 		});
-	});
+	}
+	return thisPreset;
+}
 
-  // Add messages from global setttings
-	messages = messages.concat(generateGlobalSysex());
+function limitInputFieldsToRange() {
+	$.each($("input"), function(key, element) {
+		var element = $(element);
+		var value = parseInt($(element).val());
+		var min = $(element).prop('min');
+		var max = $(element).prop('max');
 
-	// Add all Sysex start and end data to all messages
-	// and check for basic validity
-	var sysExStream = [];
-	$.each(messages, function(mkey, mvalue) {
-		var thisMessage = [];
-		// SysEx Start
-		thisMessage.push(240);
-		// Manufacturer ID
-		thisMessage.push(48);
-		// Payload
-		$.each(mvalue, function(bkey, bvalue) {
-			bvalue = parseInt(bvalue);
-			if (bvalue < 127) {
-				thisMessage.push(bvalue);
-			} else {
-				console.log("Value out of range");
-			}
-		});
-		// SysEx Stop
-		thisMessage.push(247);
-		sysExStream.push(thisMessage);
-	});
-
-	// send port number and midi data to main process
-	ipcRenderer.send('send_midi_data', {
-			port: $("#portselect select")[0].value,
-			data: sysExStream
+		if (max && value > max) $(element).val(max);
+		if (min && value < min) $(element).val(min);
 	});
 }
 
 function MSHB(val) {
-	return floor(val/128);
+	return Math.floor(val/128);
 }
 function LSHB(val) {
 	return val % 128;
