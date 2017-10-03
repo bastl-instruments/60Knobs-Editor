@@ -1,20 +1,27 @@
 {
-  "name": "electron-boilerplate",
-  "productName": "Electron Boilerplate",
-  "description": "Starter for your Electron application",
-  "version": "0.0.0",
-  "author": "Mr. Gumby <mr.gumby@example.com>",
-  "copyright": "© 2017, Gumby inc.",
-  "homepage": "http://example.com",
+  "name": "60knobs-editor",
+  "productName": "60Knobs Editor",
+  "description": "Setup 60Knobs MIDI Device",
+  "version": "0.0.1",
+  "author": "Lennart Schierling <Lennart@bastl-instruments.com>",
+  "copyright": "© 2017, Bastl Instruments",
+  "homepage": "http://bastl-instruments.com",
   "license": "MIT",
   "main": "app/background.js",
   "build": {
-    "appId": "com.example.electron-boilerplate",
+    "appId": "com.bastl-instruments.60knobs-editor",
     "files": [
       "app/**/*",
       "node_modules/**/*",
       "package.json"
     ],
+    "linux": {
+      "executableName": "60Knobs-Editor",
+      "category": "audio",
+      "target": [
+        "AppImage"
+      ]
+    },
     "publish": null
   },
   "scripts": {
