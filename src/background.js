@@ -42,4 +42,5 @@ app.on('ready', function() {
     ipcMain.on('request_midi_port_options', function (event,message) {
         sendMIDIPortOptions();
     });
+
 });
