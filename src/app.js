@@ -2,31 +2,70 @@ const numbKnobs = 60;
 
 let $ = require('jquery');
 var ipcRenderer = require('electron').ipcRenderer;
+const {dialog} = require('electron').remote;
+const loadJsonFile = require('load-json-file');
+const jetpack = require('fs-jetpack');
+
+var currentPreset = {};
+var currentFilename = null;
 
 /*
  * Main function
  */
 $(function(){
 
+	// Intialize Interface
 	createUI();
-
-	ipcRenderer.on('midi_port_options', function (event,message) {
-			setMIDIPortOptions(message);
-	});
-
-	$("button#write").on("click", sendMIDI);
-
-	$(document).on("change", "#knobs select.type", function(e) {
-		adaptKnobSettings($(e.target).parent());
-	});
 
 	$.each($("#knobs>div"), function(key, value) {
 		adaptKnobSettings($(value));
 	});
 
+	ipcRenderer.on('midi_port_options', function (event,message) {
+			setMIDIPortOptions(message);
+	});
 	ipcRenderer.send('request_midi_port_options','');
 
+
+	// Subscribe to events
+	$("button#write").on("click", sendMIDI);
+	$("button#loadSettings").on("click", loadSettingsFromFile);
+	$("button#storeSettings").on("click", storeSettingsToFile);
+
+	$(document).on("change", "#knobs select.type", function(e) {
+		adaptKnobSettings($(e.target).parent());
+	});
+
 });
+
+function loadSettingsFromFile() {
+	  var presetFilePath = dialog.showOpenDialog({
+			title: "Open Preset",
+			defaultPath: ".",
+			buttonLabel: "Load Preset"
+		});
+		if (presetFilePath) {
+			try {
+				var data = loadJsonFile.sync(presetFilePath[0]);
+				currentPreset = data;
+				currentFilename = presetFilePath[0];
+			}
+			catch(err) {
+				console.log("Not a valid settings file");
+			}
+		}
+}
+
+function storeSettingsToFile() {
+	  var presetFilePath = dialog.showSaveDialog({
+			title: "Save Preset",
+			defaultPath: currentFilename,
+			buttonLabel: "Save Preset"
+		});
+		if (presetFilePath) {
+			jetpack.write(presetFilePath, JSON.stringify(currentPreset, undefined, 4));
+		}
+}
 
 /*
  * Adapt the form fields for a single knob depending on
@@ -226,7 +265,6 @@ function createUI() {
  * options that are passed as an argument
 */
 function setMIDIPortOptions(portOptions) {
-	//console.log(portOptions);
 	var portSelect = $("#portselect select");
 	portSelect.html("");
 	for (var i=0; i<portOptions.length; i++){
@@ -239,8 +277,6 @@ function setMIDIPortOptions(portOptions) {
 
 
 function sendMIDI() {
-	//console.log("Send MIDI from renderer");
-
 	var messages = [];
 
 	// Add messages from all knobs
