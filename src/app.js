@@ -31,12 +31,15 @@ $(function(){
  * Knob is passed as jquery reference to dom
 */
 function adaptKnobSettings(knob) {
-	//console.log("Knob %o updated", knob.find("header").text());
+
+	// Get form fields for this knob
 	var newType = knob.find("select.type")[0].value;
 	var fieldOne = knob.find("tr:nth-of-type(1)");
 	var fieldTwo = knob.find("tr:nth-of-type(2)");
 	var checkbox = knob.find("tr:nth-of-type(3)");
+
 	switch (newType) {
+  // CC Type
 	case "1":
 		fieldOne.show().find('label').text("Index");
 		fieldOne.find('input').attr("min", 0);
@@ -45,6 +48,7 @@ function adaptKnobSettings(knob) {
 		fieldTwo.hide();
 		checkbox.show();
 		break;
+	// NPRN biploar
 	case "2":
 		fieldOne.show().find('label').text("Index");
 		fieldOne.find('input').attr("min", 0);
@@ -56,6 +60,7 @@ function adaptKnobSettings(knob) {
 		fieldTwo.find('input').val(63);
 		checkbox.show();
 		break;
+	// NPRN unipolar
 	case "3":
 		fieldOne.show().find('label').text("Index");
 		fieldOne.find('input').attr("min", 0);
@@ -67,6 +72,7 @@ function adaptKnobSettings(knob) {
 		fieldTwo.find('input').val(127);
 		checkbox.show();
 		break;
+	// DX7
 	case "4":
 		fieldOne.show().find('label').text("Index");
 		fieldOne.find('input').attr("min", 0);
@@ -78,6 +84,7 @@ function adaptKnobSettings(knob) {
 		fieldTwo.find('input').val(9);
 		checkbox.show();
 		break;
+	// CC on separate channel
 	case "15":
 		fieldOne.show().find('label').text("Index");
 		fieldOne.find('input').attr("min", 0);
@@ -89,11 +96,13 @@ function adaptKnobSettings(knob) {
 		fieldTwo.find('input').val(1);
 		checkbox.show();
 		break;
+	// disabled
 	case "16":
 		fieldOne.hide();
 		fieldTwo.hide();
 		checkbox.hide();
 		break;
+	// NPRN exponent
 	case "18":
 		fieldOne.show().find('label').text("Index");
 		fieldOne.find('input').attr("min", 0);
@@ -127,28 +136,33 @@ function generateSysexFromKnobValue(knob) {
 
 	var knobMessagePayload = [type, id];
 	switch (type) {
+	// CC
 	case "1":
 		knobMessagePayload.push(valOne);
 		knobMessagePayload.push(0);
 		break;
+	// NPRN bipolar and unipolar
 	case "2":
 	case "3":
 		knobMessagePayload.push(LSHB(valOne));
 		knobMessagePayload.push(MSHB(valOne));
 		knobMessagePayload.push(valTwo);
 		break;
+	// DX7
 	case "4":
 		knobMessagePayload.push(MSHB(valOne));
 		knobMessagePayload.push(LSHB(valOne));
 		knobMessagePayload.push(valTwo);
 		break;
-
+	// CC on separate channel
 	case "15":
 		knobMessagePayload.push(valOne);
 		knobMessagePayload.push(valTwo);
-
+		break;
+	// disabled
 	case "16":
 		break;
+	// NPRN exponent
 	case "18":
 		knobMessagePayload.push(LSHB(valOne));
 		knobMessagePayload.push(MSHB(valOne));
@@ -222,7 +236,7 @@ function setMIDIPortOptions(portOptions) {
 
 
 function sendMIDI() {
-	console.log("Send MIDI from renderer");
+	//console.log("Send MIDI from renderer");
 
 	var messages = [];
 
@@ -242,8 +256,11 @@ function sendMIDI() {
 	var sysExStream = [];
 	$.each(messages, function(mkey, mvalue) {
 		var thisMessage = [];
+		// SysEx Start
 		thisMessage.push(240);
+		// Manufacturer ID
 		thisMessage.push(48);
+		// Payload
 		$.each(mvalue, function(bkey, bvalue) {
 			bvalue = parseInt(bvalue);
 			if (bvalue < 127) {
@@ -252,6 +269,7 @@ function sendMIDI() {
 				console.log("Value out of range");
 			}
 		});
+		// SysEx Stop
 		thisMessage.push(247);
 		sysExStream.push(thisMessage);
 	});
