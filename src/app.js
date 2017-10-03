@@ -23,6 +23,9 @@ $(function(){
 	$.each($("#knobs>div"), function(key, value) {
 		adaptKnobSettings($(value));
 	});
+
+	ipcRenderer.send('request_midi_port_options','');
+
 });
 
 /*
