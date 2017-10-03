@@ -39,8 +39,7 @@ app.on('ready', function() {
     ipcMain.on('send_midi_data', function (event,message) {
         sendMIDIData(message);
     });
-
-    mainWindow.webContents.once('dom-ready', () => {
-      sendMIDIPortOptions();
-	});
+    ipcMain.on('request_midi_port_options', function (event,message) {
+        sendMIDIPortOptions();
+    });
 });
