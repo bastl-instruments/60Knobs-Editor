@@ -34,7 +34,7 @@ app.on('ready', function() {
     });
 
     mainWindow.loadURL('file://' + __dirname + '/app.html');
-    mainWindow.openDevTools();
+    //mainWindow.openDevTools();
 
     ipcMain.on('send_midi_data', function (event,message) {
         sendMIDIData(message);
