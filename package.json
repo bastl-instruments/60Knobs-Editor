@@ -17,7 +17,7 @@
     ],
     "linux": {
       "executableName": "60Knobs-Editor",
-      "category": "audio",
+      "category": "AudioVideo",
       "target": [
         "AppImage"
       ]
