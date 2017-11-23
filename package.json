@@ -27,6 +27,9 @@
       "category": "public.app-category.music",
       "target": ["dmg"]
     },
+    "nsis": {
+      "installerIcon" : "build/icon.ico"
+    },
     "publish": null
   },
   "scripts": {
