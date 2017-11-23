@@ -16,8 +16,8 @@ if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
   sleep 3
 fi
 
-node --version
-npm --version
+#node --version
+#npm --version
 
 npm install
 npm run release
