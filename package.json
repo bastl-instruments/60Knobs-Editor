@@ -23,6 +23,10 @@
         "AppImage"
       ]
     },
+    "mac": {
+      "category": "public.app-category.music",
+      "target": ["dmg"]
+    },
     "publish": null
   },
   "scripts": {
