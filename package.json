@@ -25,11 +25,14 @@
     },
     "mac": {
       "category": "public.app-category.music",
-      "target": ["dmg"]
+      "target": [
+        "dmg"
+      ]
     },
     "win": {
       "target": [
-        "nsis", "portable"
+        "nsis",
+        "portable"
       ]
     },
     "publish": null
@@ -53,6 +56,7 @@
     "electron-builder": "^19.16.0",
     "gulp": "^3.9.1",
     "gulp-batch": "^1.0.5",
+    "gulp-debug": "^3.1.0",
     "gulp-less": "^3.3.2",
     "gulp-plumber": "^1.1.0",
     "gulp-util": "^3.0.8",

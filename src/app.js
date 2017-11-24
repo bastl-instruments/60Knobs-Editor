@@ -28,7 +28,7 @@ $(function(){
 	$("button#loadSettings").on("click", loadSettingsFromFile);
 	$("button#storeSettings").on("click", storeSettingsToFile);
 
-	$(document).on("change", "#knobs select.type", function(e) {
+	$(document).on("change", "#knob-container select.type", function(e) {
 		adaptKnobSettings($(e.target).parent(), true);
 		limitInputFieldsToRange();
 	});
@@ -133,14 +133,14 @@ function sendMIDI() {
 function updateUIFromPreset() {
 	if (currentPreset) {
 
-		$.each($("#knobs>div"), function(key, value) {
+		$.each($("#knob-container>div"), function(key, value) {
 			var thisKnobSettings = currentPreset.knobs[parseInt(key)];
 			updateKnobFromPreset($(value), thisKnobSettings);
 		});
 
-		$("#globalsettings span:first-of-type input")[0].value = currentPreset.channel;
-		$("#globalsettings span:nth-of-type(2) input")[0].checked = currentPreset.dropNRPNMSB;
-		$("#send span:nth-of-type(2) select")[0].value = currentPreset.presetID;
+		$("#globalsettings tr:first-of-type input")[0].value = currentPreset.channel;
+		$("#globalsettings tr:nth-of-type(2) input")[0].checked = currentPreset.dropNRPNMSB;
+		$("#send tr:nth-of-type(2) select")[0].value = currentPreset.presetID;
 	}
 }
 
@@ -166,13 +166,13 @@ function updateKnobFromPreset(UIElement, settings) {
 function updatePresetFromUI() {
 	currentPreset = {knobs: []};
 
-	$.each($("#knobs>div"), function(key, value) {
+	$.each($("#knob-container>div"), function(key, value) {
 		currentPreset.knobs.push(updatePresetFromKnob($(value)));
 	});
 
-	currentPreset.channel = $("#globalsettings span:first-of-type input")[0].value;
-	currentPreset.dropNRPNMSB = $("#globalsettings span:nth-of-type(2) input")[0].checked;
-	currentPreset.presetID = $("#send span:nth-of-type(2) select")[0].value;
+	currentPreset.channel = $("#globalsettings tr:first-of-type input")[0].value;
+	currentPreset.dropNRPNMSB = $("#globalsettings tr:nth-of-type(2) input")[0].checked;
+	currentPreset.presetID = $("#send tr:nth-of-type(2) select")[0].value;
 
 }
 
@@ -268,7 +268,7 @@ function generateSysExFromPreset() {
  ***********************/
 
 function createUI() {
-	var knobContainer = $("#knobs");
+	var knobContainer = $("#knob-container");
 	var singleKnob = knobContainer.find("div:first-of-type");
 	for (var i=1; i<numbKnobs; i++) {
 		var thisKnob = singleKnob.clone();
