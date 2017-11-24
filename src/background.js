@@ -20,11 +20,17 @@ function sendMIDIPortOptions() {
 }
 
 function sendMIDIData(data) {
-  midiOut.openPort(parseInt(data.port));
-  data.data.forEach(function(item, index) {
-    midiOut.sendMessage(item);
-  });
-  midiOut.closePort();
+  try {
+    midiOut.openPort(parseInt(data.port));
+    data.data.forEach(function(item, index) {
+      midiOut.sendMessage(item);
+    });
+    midiOut.closePort();
+    return true;
+  }
+  catch(err) {
+    return false;
+  }
 }
 
 app.on('ready', function() {
@@ -38,8 +44,11 @@ app.on('ready', function() {
     //mainWindow.openDevTools();
 
     ipcMain.on('send_midi_data', function (event,message) {
-        sendMIDIData(message);
-        event.sender.send('send_midi_data',{result: true});
+        if (sendMIDIData(message)) {
+          event.sender.send('send_midi_data',{result: true});
+        } else {
+          event.sender.send('send_midi_data',{result: false, message: "Could not send"});
+        }
     });
     ipcMain.on('request_midi_port_options', function (event,message) {
         sendMIDIPortOptions();
