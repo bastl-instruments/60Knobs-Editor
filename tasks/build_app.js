@@ -3,6 +3,7 @@ const less = require('gulp-less');
 const watch = require('gulp-watch');
 const batch = require('gulp-batch');
 const plumber = require('gulp-plumber');
+const rename = require('gulp-rename');
 const jetpack = require('fs-jetpack');
 const bundle = require('./bundle');
 const utils = require('./utils');
@@ -11,6 +12,7 @@ const debug = require('gulp-debug');
 const projectDir = jetpack;
 const srcDir = jetpack.cwd('./src');
 const destDir = jetpack.cwd('./app');
+const iconDir = jetpack.cwd('./build');
 
 gulp.task('bundle', () => {
   return Promise.all([
@@ -24,6 +26,12 @@ gulp.task('less', () => {
   .pipe(plumber())
   .pipe(less())
   .pipe(gulp.dest(destDir.path('stylesheets')));
+});
+
+gulp.task('icon', () => {
+  return gulp.src(iconDir.path('icons/512x512.png'))
+  .pipe(rename('icon.png'))
+  .pipe(gulp.dest(destDir.path('')));
 });
 
 gulp.task('watch', () => {
@@ -44,4 +52,4 @@ gulp.task('watch', () => {
   }));
 });
 
-gulp.task('build', ['bundle', 'less']);
+gulp.task('build', ['bundle', 'less', 'icon']);

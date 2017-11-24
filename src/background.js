@@ -30,7 +30,8 @@ function sendMIDIData(data) {
 app.on('ready', function() {
     mainWindow = new BrowserWindow({
         height: 600,
-        width: 890
+        width: 890,
+        icon: __dirname + '/icon.png'
     });
 
     mainWindow.loadURL('file://' + __dirname + '/app.html');

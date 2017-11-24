@@ -59,6 +59,7 @@
     "gulp-debug": "^3.1.0",
     "gulp-less": "^3.3.2",
     "gulp-plumber": "^1.1.0",
+    "gulp-rename": "^1.2.2",
     "gulp-util": "^3.0.8",
     "gulp-watch": "^4.3.11",
     "rollup": "^0.45.2",
