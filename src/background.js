@@ -38,6 +38,7 @@ app.on('ready', function() {
 
     ipcMain.on('send_midi_data', function (event,message) {
         sendMIDIData(message);
+        event.sender.send('send_midi_data',{result: true});
     });
     ipcMain.on('request_midi_port_options', function (event,message) {
         sendMIDIPortOptions();

@@ -99,6 +99,14 @@ function sendMIDI() {
 			port: $("#portselect select")[0].value,
 			data: sysExStream
 	});
+	ipcRenderer.once('send_midi_data', function(event, message) {
+		if (message.result) {
+			showSendStatus("Data sent");
+		} else {
+			showSendStatus("Error: " + message.message, true);
+		}
+	});
+
 }
 
  function messagePayloadToSysEx(messages) {
@@ -401,6 +409,18 @@ function limitInputFieldsToRange() {
 		if (max && value > max) $(element).val(max);
 		if (min && value < min) $(element).val(min);
 	});
+}
+
+function showSendStatus(status, error) {
+	var element = $("#write_result");
+	element.text(status);
+	if (error) {
+		element.addClass("error");
+	} else {
+		element.removeClass("error");
+	}
+	element.fadeIn(100, 'linear');
+	element.fadeOut(3000, 'swing');
 }
 
 function MSHB(val) {
