@@ -16,7 +16,7 @@
 <div id="content">
 
 <section id="loadsafe">
-  <button id="loadSettings">Load Preset</button> <button id="storeSettings">Save Preset</button>
+  <button id="loadSettings">Load Preset</button> <button id="storeSettings">Save Preset</button> <div class="result"></div>
 </section>
 
 <section id="knobs">
@@ -110,8 +110,10 @@
   	</tr>
   </table>
 </section>
-<button id="write">Send to Device</button>
-<div id="write_result"></div>
+<span id="write">
+<button>Send to Device</button>
+<div class="result"></div>
+</span>
 </div>
 
 <script src="app.js"></script>
