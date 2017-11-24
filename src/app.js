@@ -24,7 +24,7 @@ $(function(){
 
 
 	// Subscribe to events
-	$("button#write").on("click", sendMIDI);
+	$("#write button").on("click", sendMIDI);
 	$("button#loadSettings").on("click", loadSettingsFromFile);
 	$("button#storeSettings").on("click", storeSettingsToFile);
 
@@ -51,9 +51,10 @@ function loadSettingsFromFile() {
 				currentPreset = data;
 				currentFilename = presetFilePath[0];
 				updateUIFromPreset();
+				showFileOperationStatus("Loaded Preset File", false);
 			}
 			catch(err) {
-				console.log("Not a valid settings file");
+				showFileOperationStatus("Could not load " + presetFilePath[0], true);
 				console.log(err);
 				currentPreset = null;
 				currentFilename = null;
@@ -69,7 +70,13 @@ function storeSettingsToFile() {
 		});
 		if (presetFilePath) {
 			updatePresetFromUI();
-			jetpack.write(presetFilePath, JSON.stringify(currentPreset, undefined, 4));
+			try {
+				jetpack.write(presetFilePath, JSON.stringify(currentPreset, undefined, 4));
+				showFileOperationStatus("Saved Preset to File", false);
+			}
+			catch(err) {
+				showFileOperationStatus("Could not save", false);
+			}
 		}
 }
 
@@ -412,15 +419,25 @@ function limitInputFieldsToRange() {
 }
 
 function showSendStatus(status, error) {
-	var element = $("#write_result");
+	var element = $("#write .result");
+	updateResult(element, status, error);
+}
+
+function showFileOperationStatus(status, error) {
+	var element = $("#loadsafe .result");
+	updateResult(element, status, error);
+}
+
+function updateResult(element, status, error) {
 	element.text(status);
+	element.fadeIn(100, 'linear');
 	if (error) {
 		element.addClass("error");
+		element.fadeOut(5000, 'swing');
 	} else {
 		element.removeClass("error");
+		element.fadeOut(3000, 'swing');
 	}
-	element.fadeIn(100, 'linear');
-	element.fadeOut(3000, 'swing');
 }
 
 function MSHB(val) {
