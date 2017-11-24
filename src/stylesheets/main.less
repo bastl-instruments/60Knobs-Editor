@@ -1,3 +1,21 @@
+@import url('fira-sans.css');
+
+body {
+	background-color: #ffff79;
+	font-size: 15px;
+	font-family: "Fira Sans"
+}
+::selection {
+  background: white;
+}
+
+#main-header {
+	font-size: 35px;
+	font-weight:800;
+	display: inline-block;
+	border-bottom: 7px solid black;
+	margin-bottom: 20px;
+}
 section {
 	display:block;
 	height:100%;
@@ -5,34 +23,54 @@ section {
 	margin-bottom: 30px;
 }
 section>header {
-	font-weight:bold;
-	margin-bottom:5px;
+	font-size: 23px;
+	font-weight: 700;
+	text-transform: uppercase;
+	margin-bottom: 12px;
+	display: inline-block;
+	border-bottom: 4px solid black;
 }
-
-#knobs div {
+#knob-container {
+	display: block;
+}
+#knob-container div {
 	display:inline-table;
-	border: 1px solid black;
+	border: 3px solid black;
+	background-color: white;
 	margin-right: 5px;
 	margin-bottom: 5px;
-	width: 180px;
+	width: 150px;
 	height: 100px;
+	padding: 5px;
 }
-#knobs div header {
+#knob-container div header {
 	display:none;
 }
-#knobs select.type {
+#knob-container select.type {
 	width: 100%;
 }
-#knobs tr {
-	height: 20px;
+#knob-container tr>td:first-of-type {
+	width: 100%;
 }
 
-#globalsettings, #send {
-	display: table;
+label {
+	margin-right: 5px;
 }
-#globalsettings span, #send span {
-	display: table-row;
+
+button, select, input {
+	border: 2px solid black;
+	background-color: #ffffb3;
+	padding: 5px;
+	outline: none;
+	margin: 2px;
+	font-weight: 600;
 }
-#globalsettings span label, #globalSettings span input, #send span label, #send span input {
-	display: table-cell;
+input[type=checkbox] {
+  height: 20px;
+	width: 20px;
+	-webkit-appearance:none;
+	cursor:pointer;
+}
+input[type="checkbox"]:checked {
+ background-color: black;
 }

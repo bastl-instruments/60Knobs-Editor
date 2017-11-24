@@ -12,7 +12,7 @@
 </head>
 <body>
 
-<h1>60Knobs Editor</h1>
+<div id="main-header">60Knobs Editor</div>
 <div id="content">
 
 <section id="loadsafe">
@@ -21,73 +21,94 @@
 
 <section id="knobs">
 	<header>Knob Settings</header>
-	<div>
-		<header>1</header>
-		<select class="type">
-			<option value="16"></option>
-			<option value="1" selected="selected">Control Change</option>
-			<option value="2">NRPN Biploar</option>
-			<option value="3">NRPN Uniploar</option>
-			<option value="4">DX7</option>
-			<option value="15">Control Change (extra Channel)</option>
-			<option value="18">NRPN Exponent</option>
-		</select>
-		<table>
-			<tr>
-				<td>
-					<label></label>
-				</td>
-				<td>
-					<input type="number" data-tip="my title"/>
-				</td>
-			</tr>
-			<tr>
-				<td>
-					<label></label>
-				</td>
-				<td>
-					<input type="number" />
-				</td>
-			</tr>
-			<tr>
-				<td>
-					<label>Invert Direction</label>
-				</td>
-				<td>
-					<input type="Checkbox" />
-				</td>
-			</tr>
-		</table>
-	</div></section>
+  <span id="knob-container">
+  	<div>
+  		<header>1</header>
+  		<select class="type">
+  			<option value="16"></option>
+  			<option value="1" selected="selected">Control Change</option>
+  			<option value="2">NRPN Biploar</option>
+  			<option value="3">NRPN Uniploar</option>
+  			<option value="4">DX7</option>
+  			<option value="15">Control Change (extra Channel)</option>
+  			<option value="18">NRPN Exponent</option>
+  		</select>
+  		<table>
+  			<tr>
+  				<td>
+  					<label></label>
+  				</td>
+  				<td>
+  					<input type="number" data-tip="my title"/>
+  				</td>
+  			</tr>
+  			<tr>
+  				<td>
+  					<label></label>
+  				</td>
+  				<td>
+  					<input type="number" />
+  				</td>
+  			</tr>
+  			<tr>
+  				<td>
+  					<label>Invert</label>
+  				</td>
+  				<td>
+  					<input type="Checkbox" />
+  				</td>
+  			</tr>
+  		</table>
+  	</div></span></section>
 
 <section id="globalsettings">
 	<header>Global Settings</header>
-	<span>
-		<label>MIDI Channel</label>
-		<input type="number" min="1" max="16" value="1"/>
-	</span>
-	<span>
-		<label>Drop NRPN LSB</label>
-		<input type="checkbox" />
-	</span>
+  <table>
+  	<tr>
+      <td>
+  		  <label>MIDI Channel</label>
+      </td>
+      <td>
+  		  <input type="number" min="1" max="16" value="1"/>
+      </td>
+  	</tr>
+  	<tr>
+  		<td>
+        <label>Drop NRPN LSB</label>
+      </td>
+      <td>
+  		  <input type="checkbox" />
+      </td>
+  	</tr>
+  </table>
 </section>
 
 <section id="send">
 	<header>Send to Device</header>
-	<span id="portselect">
-		<label>Select Port</label>
-		<select>
-		</select>
-	</span>
-	<span>
-		<label>Preset Number</label>
-		<select>
-			<option value="1">Preset 1</option>
-			<option value="2">Preset 2</option>
-			<option value="3">Preset 3</option>
-			<option value="4">Preset 4</option>
-		</select>
-	</span>
+  <table>
+  	<tr id="portselect">
+      <td>
+  		    <label>Select Port</label>
+        </td>
+        <td>
+  	      <select>
+  	      </select>
+      </td>
+    </tr>
+  	<tr>
+      <td>
+  		    <label>Preset Number</label>
+      </td>
+      <td>
+    		<select>
+    			<option value="1">Preset 1</option>
+    			<option value="2">Preset 2</option>
+    			<option value="3">Preset 3</option>
+    			<option value="4">Preset 4</option>
+    		</select>
+      </td>
+  	</tr>
+  </table>
 </section>
 <button id="write">Send to Device</button>
 </div>
