@@ -267,13 +267,16 @@ function generateSysExFromPreset() {
 	});
 
 	messages.push([9, currentPreset.channel]);
-	messages.push([5, currentPreset.presetID]);
 
 	if (currentPreset.dropNRPNMSB) {
 		messages.push([19, 1]);
 	} else {
 		messages.push([19, 0]);
 	}
+
+	messages.push([5, currentPreset.presetID]);
+
+
 
 	return messages;
 }
