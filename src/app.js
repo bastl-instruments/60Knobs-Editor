@@ -51,10 +51,10 @@ function loadSettingsFromFile() {
 				currentPreset = data;
 				currentFilename = presetFilePath[0];
 				updateUIFromPreset();
-				showFileOperationStatus("Loaded Preset File", false);
+				showFileOperationStatus("Loaded Preset File");
 			}
 			catch(err) {
-				showFileOperationStatus("Could not load " + presetFilePath[0], true);
+				showFileOperationStatus("Could not load " + presetFilePath[0], {error: true});
 				console.log(err);
 				currentPreset = null;
 				currentFilename = null;
@@ -72,10 +72,10 @@ function storeSettingsToFile() {
 			updatePresetFromUI();
 			try {
 				jetpack.write(presetFilePath, JSON.stringify(currentPreset, undefined, 4));
-				showFileOperationStatus("Saved Preset to File", false);
+				showFileOperationStatus("Saved Preset to File");
 			}
 			catch(err) {
-				showFileOperationStatus("Could not save", false);
+				showFileOperationStatus("Could not save");
 			}
 		}
 }
@@ -101,19 +101,22 @@ function sendMIDI() {
 	var messages = generateSysExFromPreset();
 	var sysExStream = messagePayloadToSysEx(messages);
 
-	// send port number and midi data to main process
-	ipcRenderer.send('send_midi_data', {
-			port: $("#portselect select")[0].value,
-			data: sysExStream
-	});
-	ipcRenderer.once('send_midi_data', function(event, message) {
-		if (message.result) {
-			showSendStatus("Data sent");
-		} else {
-			showSendStatus("Error: " + message.message, true);
-		}
-	});
+	showSendStatus("Sending..", {persistent: true});
 
+	setTimeout(function() {
+		// send port number and midi data to main process
+		ipcRenderer.send('send_midi_data', {
+				port: $("#portselect select")[0].value,
+				data: sysExStream
+		});
+		ipcRenderer.once('send_midi_data', function(event, message) {
+			if (message.result) {
+				showSendStatus("Data sent");
+			} else {
+				showSendStatus("Error: " + message.message, true);
+			}
+		});
+	}, 500);
 }
 
  function messagePayloadToSysEx(messages) {
@@ -394,7 +397,7 @@ function getCleanPreset() {
 	var thisPreset = {
 		channel: 1,
 		dropNRPNMSB: false,
-		presetID: 1,
+		presetID: 0,
 		knobs: []
 	};
 
@@ -421,25 +424,25 @@ function limitInputFieldsToRange() {
 	});
 }
 
-function showSendStatus(status, error) {
+function showSendStatus(status, options) {
 	var element = $("#write .result");
-	updateResult(element, status, error);
+	updateResult(element, status, options||{});
 }
 
-function showFileOperationStatus(status, error) {
+function showFileOperationStatus(status, options) {
 	var element = $("#loadsafe .result");
-	updateResult(element, status, error);
+	updateResult(element, status, options||{});
 }
 
-function updateResult(element, status, error) {
+function updateResult(element, status, options) {
 	element.text(status);
 	element.fadeIn(100, 'linear');
-	if (error) {
+	if (options.error) {
 		element.addClass("error");
-		element.fadeOut(5000, 'swing');
+		if (!options.persistent) element.fadeOut(5000, 'swing');
 	} else {
 		element.removeClass("error");
-		element.fadeOut(3000, 'swing');
+		if (!options.persistent) element.fadeOut(3000, 'swing');
 	}
 }
 
