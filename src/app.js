@@ -33,6 +33,11 @@ $(function(){
 		limitInputFieldsToRange();
 	});
 
+	$(document).on("change", "#knob-container tr:nth-of-type(1) input", function(e) {
+		adaptKnobSettings($(e.target).parent().parent().parent().parent().parent(), false);
+		limitInputFieldsToRange();
+	});
+
 });
 
 /* ***********
@@ -347,13 +352,14 @@ function adaptKnobSettings(knob, resetFieldValues) {
 	// DX7
 	case "4":
 		fieldOne.show().find('label').text("Index");
-		fieldOne.find('input').attr("min", 0);
-		fieldOne.find('input').attr("max", 144);
-		if (resetFieldValues) fieldOne.find('input').val(0);
+		fieldOne.find('input').attr("min", 1);
+		fieldOne.find('input').attr("max", 145);
+		if (resetFieldValues) fieldOne.find('input').val(1);
 		fieldTwo.show().find('label').text("Range");
-		fieldTwo.find('input').attr("min", 1);
-		fieldTwo.find('input').attr("max", 99);
-		if (resetFieldValues) fieldTwo.find('input').val(9);
+		var DX7range = getDX7Range(fieldOne.find('input').val());
+		fieldTwo.find('input').attr("min", DX7range[0]);
+		fieldTwo.find('input').attr("max", DX7range[1]);
+		if (resetFieldValues) fieldTwo.find('input').val(DX7range[1]);
 		checkbox.show();
 		break;
 	// CC on separate channel
@@ -387,6 +393,70 @@ function adaptKnobSettings(knob, resetFieldValues) {
 		checkbox.show();
 		break;
 	}
+}
+
+function getDX7Range(index) {
+
+	index = Number(index);
+
+	if ($.inArray(index,Array(
+		1,2,3,4,5,6,7,8,9,10,11,
+		17,20,
+		22,23,24,25,26,27,28,29,30,31,32,
+		38,41,
+		43,44,45,46,47,48,49,50,51,52,53,
+		59,62,
+		64,65,66,67,68,69,70,71,72,73,74,
+		80,83,
+		85,86,87,88,89,90,91,92,93,94,95,
+		101,104,
+		106,107,108,109,110,111,112,113,114,115,116,
+		122,125,
+		127,178,129,130,131,132,133,134,
+		148,138,140,141
+	)) != -1) return Array(0,99);
+
+	if ($.inArray(index,Array(
+		12,13,15,
+		33,34,36,
+		54,55,57,
+		75,76,78,
+		96,97,99,
+		117,118,120
+	)) != -1) return [0,3];
+
+	if ($.inArray(index,Array(
+		14,16,
+		35,37,
+		56,58,
+		77,79,
+		98,100,
+		119,121,
+		136,
+		144
+	)) != -1) return [0,7];
+
+	if ($.inArray(index,Array(
+		18,39,60,81,102,123,137,142
+	)) != -1) return [0,1];
+
+	if ($.inArray(index,Array(
+		19,40,61,82,103,124,135
+	)) != -1) return [0,31];
+
+	if ($.inArray(index,Array(
+		21,42,63,84,105,126
+	)) != -1) return [0,14];
+
+	if ($.inArray(index,Array(
+		143,
+	)) != -1) return [0,4];
+
+	if ($.inArray(index,Array(
+		145,
+	)) != -1) return [0,48];
+
+	console.log("Could not find DX7 range for index", index);
 }
 
 /********
