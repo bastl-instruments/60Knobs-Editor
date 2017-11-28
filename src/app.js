@@ -346,7 +346,7 @@ function adaptKnobSettings(knob, resetFieldValues) {
 		if (resetFieldValues) fieldOne.find('input').val(0);
 		fieldTwo.show().find('label').text("Range");
 		fieldTwo.find('input').attr("min", 1);
-		fieldTwo.find('input').attr("max", 9);
+		fieldTwo.find('input').attr("max", 99);
 		if (resetFieldValues) fieldTwo.find('input').val(9);
 		checkbox.show();
 		break;
