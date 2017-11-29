@@ -14,7 +14,7 @@ $(function(){
 
 	createUI();
 
-	currentPreset = getCleanPreset();
+	currentPreset = getLXRPreset();
 	updateUIFromPreset();
 
 	ipcRenderer.on('midi_port_options', function (event,message) {
@@ -480,6 +480,76 @@ function getCleanPreset() {
 		});
 	}
 	return thisPreset;
+}
+
+function getLXRPreset() {
+
+	return {
+		channel: 1,
+		dropNRPNMSB: true,
+		presetID: 0,
+		knobs: [
+		/*01*/ {type:1, valOne: 84, valTwo:0, inverted: false},
+		/*02*/ {type:1, valOne: 83, valTwo:0, inverted: false},
+		/*03*/ {type:1, valOne: 51, valTwo:0, inverted: false},
+		/*04*/ {type:1, valOne: 75, valTwo:0, inverted: false},
+		/*05*/ {type:1, valOne: 71, valTwo:0, inverted: false},
+		/*06*/ {type:1, valOne: 103, valTwo:0, inverted: false},
+		/*07*/ {type:1, valOne: 109, valTwo:0, inverted: false},
+		/*08*/ {type:1, valOne: 89, valTwo:0, inverted: false},
+		/*09*/ {type:3, valOne: 51*128, valTwo:11, inverted: false},
+		/*10*/ {type:1, valOne: 122, valTwo:0, inverted: false},
+		/*11*/ {type:1, valOne: 86, valTwo:0, inverted: false},
+		/*12*/ {type:1, valOne: 85, valTwo:0, inverted: false},
+		/*13*/ {type:1, valOne: 53, valTwo:0, inverted: false},
+		/*14*/ {type:1, valOne: 76, valTwo:0, inverted: false},
+		/*15*/ {type:1, valOne: 39, valTwo:0, inverted: false},
+		/*16*/ {type:1, valOne: 45, valTwo:0, inverted: false},
+		/*17*/ {type:1, valOne: 110, valTwo:0, inverted: false},
+		/*18*/ {type:1, valOne: 90, valTwo:0, inverted: false},
+		/*19*/ {type:3, valOne: 52*128, valTwo:11, inverted: false},
+		/*20*/ {type:1, valOne: 123, valTwo:0, inverted: false},
+		/*21*/ {type:1, valOne: 13, valTwo:0, inverted: false},
+		/*22*/ {type:1, valOne: 87, valTwo:0, inverted: false},
+		/*23*/ {type:1, valOne: 55, valTwo:0, inverted: false},
+		/*24*/ {type:1, valOne: 77, valTwo:0, inverted: false},
+		/*25*/ {type:1, valOne: 40, valTwo:0, inverted: false},
+		/*26*/ {type:1, valOne: 46, valTwo:0, inverted: false},
+		/*27*/ {type:1, valOne: 111, valTwo:0, inverted: false},
+		/*28*/ {type:1, valOne: 91, valTwo:0, inverted: false},
+		/*29*/ {type:3, valOne: 53*128, valTwo:11, inverted: false},
+		/*30*/ {type:1, valOne: 124, valTwo:0, inverted: false},
+		/*31*/ {type:1, valOne: 15, valTwo:0, inverted: false},
+		/*32*/ {type:1, valOne: 29, valTwo:0, inverted: false},
+		/*33*/ {type:1, valOne: 57, valTwo:0, inverted: false},
+		/*34*/ {type:1, valOne: 78, valTwo:0, inverted: false},
+		/*35*/ {type:1, valOne: 41, valTwo:0, inverted: false},
+		/*36*/ {type:1, valOne: 47, valTwo:0, inverted: false},
+		/*37*/ {type:1, valOne: 112, valTwo:0, inverted: false},
+		/*38*/ {type:1, valOne: 92, valTwo:0, inverted: false},
+		/*39*/ {type:3, valOne: 54*128, valTwo:11, inverted: false},
+		/*40*/ {type:1, valOne: 125, valTwo:0, inverted: false},
+		/*41*/ {type:1, valOne: 17, valTwo:0, inverted: false},
+		/*42*/ {type:1, valOne: 58, valTwo:0, inverted: false},
+		/*43*/ {type:1, valOne: 59, valTwo:0, inverted: false},
+		/*44*/ {type:1, valOne: 67, valTwo:0, inverted: false},
+		/*45*/ {type:1, valOne: 42, valTwo:0, inverted: false},
+		/*46*/ {type:1, valOne: 48, valTwo:0, inverted: false},
+		/*47*/ {type:1, valOne: 113, valTwo:0, inverted: false},
+		/*48*/ {type:1, valOne: 93, valTwo:0, inverted: false},
+		/*49*/ {type:3, valOne: 55*128, valTwo:11, inverted: false},
+		/*50*/ {type:1, valOne: 126, valTwo:0, inverted: false},
+		/*51*/ {type:1, valOne: 19, valTwo:0, inverted: false},
+		/*52*/ {type:1, valOne: 61, valTwo:0, inverted: false},
+		/*53*/ {type:1, valOne: 62, valTwo:0, inverted: false},
+		/*54*/ {type:1, valOne: 68, valTwo:0, inverted: false},
+		/*55*/ {type:1, valOne: 43, valTwo:0, inverted: false},
+		/*56*/ {type:1, valOne: 49, valTwo:0, inverted: false},
+		/*57*/ {type:1, valOne: 114, valTwo:0, inverted: false},
+		/*58*/ {type:1, valOne: 94, valTwo:0, inverted: false},
+		/*59*/ {type:3, valOne: 56*128, valTwo:11, inverted: false},
+		/*60*/ {type:1, valOne: 127, valTwo:0, inverted: false},
+	]};
 }
 
 function limitInputFieldsToRange() {
