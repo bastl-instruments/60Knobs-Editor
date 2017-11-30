@@ -2,7 +2,7 @@
   "name": "60knobs-editor",
   "productName": "60Knobs Editor",
   "description": "Setup 60Knobs MIDI Device",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "author": "Lennart Schierling <Lennart@bastl-instruments.com>",
   "copyright": "© 2017, Bastl Instruments",
