@@ -135,7 +135,7 @@ function sendMIDI() {
 		 // Payload
 		 $.each(mvalue, function(bkey, bvalue) {
 			 bvalue = parseInt(bvalue);
-			 if (bvalue < 127) {
+			 if (bvalue <= 127) {
 				 thisMessage.push(bvalue);
 			 } else {
 				 console.log("Value out of range");
