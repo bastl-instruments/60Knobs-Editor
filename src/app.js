@@ -162,7 +162,7 @@ function updateUIFromPreset() {
 		});
 
 		$("#globalsettings tr:first-of-type input")[0].value = currentPreset.channel;
-		$("#globalsettings tr:nth-of-type(2) input")[0].checked = currentPreset.dropNRPNMSB;
+		$("#globalsettings tr:nth-of-type(2) input")[0].checked = currentPreset.NRPNMSB;
 		$("#send tr:nth-of-type(2) select")[0].value = currentPreset.presetID;
 	}
 }
@@ -194,7 +194,7 @@ function updatePresetFromUI() {
 	});
 
 	currentPreset.channel = $("#globalsettings tr:first-of-type input")[0].value;
-	currentPreset.dropNRPNMSB = $("#globalsettings tr:nth-of-type(2) input")[0].checked;
+	currentPreset.NRPNMSB = $("#globalsettings tr:nth-of-type(2) input")[0].checked;
 	currentPreset.presetID = $("#send tr:nth-of-type(2) select")[0].value;
 
 }
@@ -276,10 +276,10 @@ function generateSysExFromPreset() {
 
 	messages.push([9, currentPreset.channel]);
 
-	if (currentPreset.dropNRPNMSB) {
-		messages.push([19, 1]);
-	} else {
+	if (currentPreset.NRPNMSB) {
 		messages.push([19, 0]);
+	} else {
+		messages.push([19, 1]);
 	}
 
 	messages.push([5, currentPreset.presetID]);
@@ -466,7 +466,7 @@ function getDX7Range(index) {
 function getCleanPreset() {
 	var thisPreset = {
 		channel: 1,
-		dropNRPNMSB: false,
+		NRPNMSB: true,
 		presetID: 0,
 		knobs: []
 	};
@@ -486,7 +486,7 @@ function getLXRPreset() {
 
 	return {
 		channel: 1,
-		dropNRPNMSB: true,
+		NRPNMSB: false,
 		presetID: 0,
 		knobs: [
 		/*01*/ {type:1, valOne: 84, valTwo:0, inverted: false},
