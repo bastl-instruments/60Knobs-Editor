@@ -357,8 +357,9 @@ function adaptKnobSettings(knob, resetFieldValues) {
 		if (resetFieldValues) fieldOne.find('input').val(1);
 		fieldTwo.show().find('label').text("Range");
 		var DX7range = getDX7Range(fieldOne.find('input').val());
-		fieldTwo.find('input').attr("min", DX7range[0]);
-		fieldTwo.find('input').attr("max", DX7range[1]);
+		fieldTwo.find('input').attr("min", 0);
+		fieldTwo.find('input').attr("max", 127);
+		fieldTwo.find('input').val(DX7range[1]);
 		if (resetFieldValues) fieldTwo.find('input').val(DX7range[1]);
 		checkbox.show();
 		break;
