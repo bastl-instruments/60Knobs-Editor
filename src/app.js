@@ -1,5 +1,3 @@
-(function () {'use strict';
-
 const numbKnobs = 60;
 
 let $ = require('jquery');
@@ -256,7 +254,7 @@ function generateSysExFromPreset() {
 			knobMessage.push(valTwo);
 			break;
 		// CC range
-		case "5":
+		case "11":
 			knobMessage.push(valOne);
 			knobMessage.push(valTwo);
 			knobMessage.push(valThree);
@@ -381,7 +379,7 @@ function adaptKnobSettings(knob, resetFieldValues) {
 		checkbox.show();
 		break;
 	// CC Range Tyoe
-	case "5":
+	case "11":
 	    fieldOne.show().find('label').text("index");
 
 		fieldTwo.show().find('label').text("Min Value");
@@ -486,6 +484,30 @@ function getDX7Range(index) {
 	)) != -1) return [0,48];
 
 	console.log("Could not find DX7 range for index", index);
+}
+
+/********
+ * HELPER
+ ********/
+
+function getCleanPreset() {
+	var thisPreset = {
+		channel: 1,
+		NRPNMSB: true,
+		presetID: 0,
+		knobs: []
+	};
+
+	for (var i=0; i<numbKnobs; i++) {
+		thisPreset.knobs.push({
+			type: 1,
+			valOne: i,
+			valTwo: 0,
+			valThree: 0,
+			inverted: false,
+		});
+	}
+	return thisPreset;
 }
 
 function getLXRPreset() {
@@ -598,6 +620,3 @@ function MSHB(val) {
 function LSHB(val) {
 	return val % 128;
 }
-
-}());
-//# sourceMappingURL=app.js.map
