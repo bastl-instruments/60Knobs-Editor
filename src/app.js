@@ -406,6 +406,13 @@ function adaptKnobSettings(knob, resetFieldValues) {
 		fieldThree.hide();
 		checkbox.show();
 		break;
+	// Disable knob
+	case "16":
+		fieldOne.hide();
+		fieldTwo.hide();
+		fieldThree.hide();
+		checkbox.hide();
+		break;
 	// NPRN exponent
 	case "18":
 		fieldOne.show().find('label').text("Index");
