@@ -171,11 +171,15 @@ function updateKnobFromPreset(UIElement, settings) {
 	var typeField = UIElement.find("select.type")[0];
 	var fieldOne = UIElement.find("tr:nth-of-type(1) input")[0];
 	var fieldTwo = UIElement.find("tr:nth-of-type(2) input")[0];
-	var checkbox = UIElement.find("tr:nth-of-type(3) input")[0];
+	var fieldThree = UIElement.find("tr:nth-of-type(3) input")[0];
+	var fieldFour = UIElement.find("tr:nth-of-type(4) input")[0];
+	var checkbox = UIElement.find("tr:nth-of-type(5) input")[0];
 
 	typeField.value = settings.type;
 	fieldOne.value = settings.valOne;
 	fieldTwo.value = settings.valTwo;
+	fieldThree.value = settings.valThree;
+	fieldFour.value = settings.valFour;
 	checkbox.checked = settings.inverted;
 
 	adaptKnobSettings(UIElement, false);
@@ -203,12 +207,16 @@ function updatePresetFromKnob(UIElement) {
 	var typeField = UIElement.find("select.type")[0];
 	var fieldOne = UIElement.find("tr:nth-of-type(1) input")[0];
 	var fieldTwo = UIElement.find("tr:nth-of-type(2) input")[0];
-	var checkbox = UIElement.find("tr:nth-of-type(3) input")[0];
+	var fieldThree = UIElement.find("tr:nth-of-type(3) input")[0];
+	var fieldFour = UIElement.find("tr:nth-of-type(4) input")[0];
+	var checkbox = UIElement.find("tr:nth-of-type(5) input")[0];
 
 	return {
 		type: typeField.value,
 		valOne: fieldOne.value,
 		valTwo: fieldTwo.value,
+		valThree: fieldThree.value,
+		valFour: fieldFour.value,
 		inverted: checkbox.checked
 	};
 }
@@ -225,6 +233,8 @@ function generateSysExFromPreset() {
 		var type = value.type;
 		var valOne = value.valOne;
 		var valTwo = value.valTwo;
+		var valThree = value.valThree;
+		var valFour = value.valFour;
 		var valCheck = value.inverted;
 
 		var knobMessage = [type, id];
@@ -247,6 +257,19 @@ function generateSysExFromPreset() {
 			knobMessage.push(MSHB(valOne));
 			knobMessage.push(LSHB(valOne));
 			knobMessage.push(valTwo);
+			break;
+		// CC range
+		case "11":
+			knobMessage.push(valOne);
+			knobMessage.push(valTwo);
+			knobMessage.push(valThree);
+			break;
+		// CC range on separate channel
+		case "12":
+			knobMessage.push(valOne);
+			knobMessage.push(valTwo);
+			knobMessage.push(valThree);
+			knobMessage.push(valFour);
 			break;
 		// CC on separate channel
 		case "15":
@@ -313,7 +336,9 @@ function adaptKnobSettings(knob, resetFieldValues) {
 	var newType = knob.find("select.type")[0].value;
 	var fieldOne = knob.find("tr:nth-of-type(1)");
 	var fieldTwo = knob.find("tr:nth-of-type(2)");
-	var checkbox = knob.find("tr:nth-of-type(3)");
+	var fieldThree = knob.find("tr:nth-of-type(3)");
+	var fieldFour = knob.find("tr:nth-of-type(4)");
+	var checkbox = knob.find("tr:nth-of-type(5)");
 
 	switch (newType) {
   // CC Type
@@ -323,6 +348,8 @@ function adaptKnobSettings(knob, resetFieldValues) {
 		fieldOne.find('input').attr("max", 127);
 		if (resetFieldValues) fieldOne.find('input').val(0);
 		fieldTwo.hide();
+		fieldThree.hide();
+		fieldFour.hide();
 		checkbox.show();
 		break;
 	// NPRN biploar
@@ -335,6 +362,8 @@ function adaptKnobSettings(knob, resetFieldValues) {
 		fieldTwo.find('input').attr("min", 1);
 		fieldTwo.find('input').attr("max", 63);
 		if (resetFieldValues) fieldTwo.find('input').val(63);
+		fieldThree.hide();
+		fieldFour.hide();
 		checkbox.show();
 		break;
 	// NPRN unipolar
@@ -347,6 +376,8 @@ function adaptKnobSettings(knob, resetFieldValues) {
 		fieldTwo.find('input').attr("min", 1);
 		fieldTwo.find('input').attr("max", 127);
 		if (resetFieldValues) fieldTwo.find('input').val(127);
+		fieldThree.hide();
+		fieldFour.hide();
 		checkbox.show();
 		break;
 	// DX7
@@ -361,6 +392,44 @@ function adaptKnobSettings(knob, resetFieldValues) {
 		fieldTwo.find('input').attr("max", 127);
 		fieldTwo.find('input').val(DX7range[1]);
 		if (resetFieldValues) fieldTwo.find('input').val(DX7range[1]);
+		fieldThree.hide();
+		fieldFour.hide();
+		checkbox.show();
+		break;
+	// CC Range Tyoe
+	case "11":
+	    fieldOne.show().find('label').text("index");
+
+		fieldTwo.show().find('label').text("Min Value");
+		fieldTwo.find('input').attr("min", 0);
+		fieldTwo.find('input').attr("max", 126);
+		if (resetFieldValues) fieldTwo.find('input').val(0);
+		
+		fieldThree.show().find('label').text("Max Value");
+		fieldThree.find('input').attr("min", 1);
+		fieldThree.find('input').attr("max", 127);
+		if (resetFieldValues) fieldThree.find('input').val(127);
+		fieldFour.hide();
+		checkbox.show();
+		break;
+	// CC Range Type on separate channel
+	case "12":
+	    fieldOne.show().find('label').text("index");
+
+		fieldTwo.show().find('label').text("Min Value");
+		fieldTwo.find('input').attr("min", 0);
+		fieldTwo.find('input').attr("max", 126);
+		if (resetFieldValues) fieldTwo.find('input').val(0);
+		
+		fieldThree.show().find('label').text("Max Value");
+		fieldThree.find('input').attr("min", 1);
+		fieldThree.find('input').attr("max", 127);
+		if (resetFieldValues) fieldThree.find('input').val(127);
+		
+		fieldFour.show().find('label').text("Channel");
+		fieldFour.find('input').attr("min", 1);
+		fieldFour.find('input').attr("max", 16);
+		if (resetFieldValues) fieldFour.find('input').val(1);
 		checkbox.show();
 		break;
 	// CC on separate channel
@@ -373,12 +442,16 @@ function adaptKnobSettings(knob, resetFieldValues) {
 		fieldTwo.find('input').attr("min", 1);
 		fieldTwo.find('input').attr("max", 16);
 		if (resetFieldValues) fieldTwo.find('input').val(1);
+		fieldThree.hide();
+		fieldFour.hide();
 		checkbox.show();
 		break;
-	// disabled
+	// Disable knob
 	case "16":
 		fieldOne.hide();
 		fieldTwo.hide();
+		fieldThree.hide();
+		fieldFour.hide();
 		checkbox.hide();
 		break;
 	// NPRN exponent
@@ -391,6 +464,8 @@ function adaptKnobSettings(knob, resetFieldValues) {
 		fieldTwo.find('input').attr("min", 1);
 		fieldTwo.find('input').attr("max", 4);
 		if (resetFieldValues) fieldTwo.find('input').val(1);
+		fieldThree.hide();
+		fieldFour.hide();
 		checkbox.show();
 		break;
 	}
@@ -477,6 +552,8 @@ function getCleanPreset() {
 			type: 1,
 			valOne: i,
 			valTwo: 0,
+			valThree: 0,
+			valFour: 0,
 			inverted: false,
 		});
 	}
@@ -490,66 +567,66 @@ function getLXRPreset() {
 		NRPNMSB: false,
 		presetID: 0,
 		knobs: [
-		/*01*/ {type:1, valOne: 84, valTwo:0, inverted: false},
-		/*02*/ {type:1, valOne: 83, valTwo:0, inverted: false},
-		/*03*/ {type:1, valOne: 51, valTwo:0, inverted: false},
-		/*04*/ {type:1, valOne: 75, valTwo:0, inverted: false},
-		/*05*/ {type:1, valOne: 71, valTwo:0, inverted: false},
-		/*06*/ {type:1, valOne: 103, valTwo:0, inverted: false},
-		/*07*/ {type:1, valOne: 109, valTwo:0, inverted: false},
-		/*08*/ {type:1, valOne: 89, valTwo:0, inverted: false},
-		/*09*/ {type:3, valOne: 51, valTwo:11, inverted: false},
-		/*10*/ {type:1, valOne: 122, valTwo:0, inverted: false},
-		/*11*/ {type:1, valOne: 86, valTwo:0, inverted: false},
-		/*12*/ {type:1, valOne: 85, valTwo:0, inverted: false},
-		/*13*/ {type:1, valOne: 53, valTwo:0, inverted: false},
-		/*14*/ {type:1, valOne: 76, valTwo:0, inverted: false},
-		/*15*/ {type:1, valOne: 39, valTwo:0, inverted: false},
-		/*16*/ {type:1, valOne: 45, valTwo:0, inverted: false},
-		/*17*/ {type:1, valOne: 110, valTwo:0, inverted: false},
-		/*18*/ {type:1, valOne: 90, valTwo:0, inverted: false},
-		/*19*/ {type:3, valOne: 52, valTwo:11, inverted: false},
-		/*20*/ {type:1, valOne: 123, valTwo:0, inverted: false},
-		/*21*/ {type:1, valOne: 13, valTwo:0, inverted: false},
-		/*22*/ {type:1, valOne: 87, valTwo:0, inverted: false},
-		/*23*/ {type:1, valOne: 55, valTwo:0, inverted: false},
-		/*24*/ {type:1, valOne: 77, valTwo:0, inverted: false},
-		/*25*/ {type:1, valOne: 40, valTwo:0, inverted: false},
-		/*26*/ {type:1, valOne: 46, valTwo:0, inverted: false},
-		/*27*/ {type:1, valOne: 111, valTwo:0, inverted: false},
-		/*28*/ {type:1, valOne: 91, valTwo:0, inverted: false},
-		/*29*/ {type:3, valOne: 53, valTwo:11, inverted: false},
-		/*30*/ {type:1, valOne: 124, valTwo:0, inverted: false},
-		/*31*/ {type:1, valOne: 15, valTwo:0, inverted: false},
-		/*32*/ {type:1, valOne: 29, valTwo:0, inverted: false},
-		/*33*/ {type:1, valOne: 57, valTwo:0, inverted: false},
-		/*34*/ {type:1, valOne: 78, valTwo:0, inverted: false},
-		/*35*/ {type:1, valOne: 41, valTwo:0, inverted: false},
-		/*36*/ {type:1, valOne: 47, valTwo:0, inverted: false},
-		/*37*/ {type:1, valOne: 112, valTwo:0, inverted: false},
-		/*38*/ {type:1, valOne: 92, valTwo:0, inverted: false},
-		/*39*/ {type:3, valOne: 54, valTwo:11, inverted: false},
-		/*40*/ {type:1, valOne: 125, valTwo:0, inverted: false},
-		/*41*/ {type:1, valOne: 17, valTwo:0, inverted: false},
-		/*42*/ {type:1, valOne: 58, valTwo:0, inverted: false},
-		/*43*/ {type:1, valOne: 59, valTwo:0, inverted: false},
-		/*44*/ {type:1, valOne: 67, valTwo:0, inverted: false},
-		/*45*/ {type:1, valOne: 42, valTwo:0, inverted: false},
-		/*46*/ {type:1, valOne: 48, valTwo:0, inverted: false},
-		/*47*/ {type:1, valOne: 113, valTwo:0, inverted: false},
-		/*48*/ {type:1, valOne: 93, valTwo:0, inverted: false},
-		/*49*/ {type:3, valOne: 55, valTwo:11, inverted: false},
-		/*50*/ {type:1, valOne: 126, valTwo:0, inverted: false},
-		/*51*/ {type:1, valOne: 19, valTwo:0, inverted: false},
-		/*52*/ {type:1, valOne: 61, valTwo:0, inverted: false},
-		/*53*/ {type:1, valOne: 62, valTwo:0, inverted: false},
-		/*54*/ {type:1, valOne: 68, valTwo:0, inverted: false},
-		/*55*/ {type:1, valOne: 43, valTwo:0, inverted: false},
-		/*56*/ {type:1, valOne: 49, valTwo:0, inverted: false},
-		/*57*/ {type:1, valOne: 114, valTwo:0, inverted: false},
-		/*58*/ {type:1, valOne: 94, valTwo:0, inverted: false},
-		/*59*/ {type:3, valOne: 56, valTwo:11, inverted: false},
-		/*60*/ {type:1, valOne: 127, valTwo:0, inverted: false},
+		/*01*/ {type:1, valOne: 84, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*02*/ {type:1, valOne: 83, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*03*/ {type:1, valOne: 51, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*04*/ {type:1, valOne: 75, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*05*/ {type:1, valOne: 71, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*06*/ {type:1, valOne: 103, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*07*/ {type:1, valOne: 109, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*08*/ {type:1, valOne: 89, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*09*/ {type:3, valOne: 51, valTwo:11, valThree:0, valFour:0, 	inverted: false},
+		/*10*/ {type:1, valOne: 122, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*11*/ {type:1, valOne: 86, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*12*/ {type:1, valOne: 85, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*13*/ {type:1, valOne: 53, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*14*/ {type:1, valOne: 76, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*15*/ {type:1, valOne: 39, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*16*/ {type:1, valOne: 45, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*17*/ {type:1, valOne: 110, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*18*/ {type:1, valOne: 90, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*19*/ {type:3, valOne: 52, valTwo:11, valThree:0, valFour:0, 	inverted: false},
+		/*20*/ {type:1, valOne: 123, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*21*/ {type:1, valOne: 13, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*22*/ {type:1, valOne: 87, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*23*/ {type:1, valOne: 55, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*24*/ {type:1, valOne: 77, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*25*/ {type:1, valOne: 40, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*26*/ {type:1, valOne: 46, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*27*/ {type:1, valOne: 111, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*28*/ {type:1, valOne: 91, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*29*/ {type:3, valOne: 53, valTwo:11, valThree:0, valFour:0, 	inverted: false},
+		/*30*/ {type:1, valOne: 124, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*31*/ {type:1, valOne: 15, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*32*/ {type:1, valOne: 29, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*33*/ {type:1, valOne: 57, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*34*/ {type:1, valOne: 78, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*35*/ {type:1, valOne: 41, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*36*/ {type:1, valOne: 47, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*37*/ {type:1, valOne: 112, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*38*/ {type:1, valOne: 92, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*39*/ {type:3, valOne: 54, valTwo:11, valThree:0, valFour:0, 	inverted: false},
+		/*40*/ {type:1, valOne: 125, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*41*/ {type:1, valOne: 17, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*42*/ {type:1, valOne: 58, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*43*/ {type:1, valOne: 59, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*44*/ {type:1, valOne: 67, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*45*/ {type:1, valOne: 42, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*46*/ {type:1, valOne: 48, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*47*/ {type:1, valOne: 113, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*48*/ {type:1, valOne: 93, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*49*/ {type:3, valOne: 55, valTwo:11, valThree:0, valFour:0, 	inverted: false},
+		/*50*/ {type:1, valOne: 126, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*51*/ {type:1, valOne: 19, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*52*/ {type:1, valOne: 61, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*53*/ {type:1, valOne: 62, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*54*/ {type:1, valOne: 68, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*55*/ {type:1, valOne: 43, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*56*/ {type:1, valOne: 49, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*57*/ {type:1, valOne: 114, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*58*/ {type:1, valOne: 94, valTwo:0, valThree:0, valFour:0, 	inverted: false},
+		/*59*/ {type:3, valOne: 56, valTwo:11, valThree:0, valFour:0, 	inverted: false},
+		/*60*/ {type:1, valOne: 127, valTwo:0, valThree:0, valFour:0, 	inverted: false},
 	]};
 }
 

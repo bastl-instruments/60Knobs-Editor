@@ -2,7 +2,7 @@
   "name": "60knobs-editor",
   "productName": "60Knobs Editor",
   "description": "Setup 60Knobs MIDI Device",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "author": "Lennart Schierling <Lennart@bastl-instruments.com>",
   "copyright": "© 2017, Bastl Instruments",
@@ -25,8 +25,9 @@
     },
     "mac": {
       "category": "public.app-category.music",
+	  "icon": "build/icon.icns",
       "target": [
-        "dmg"
+        "pkg"
       ]
     },
     "win": {
@@ -45,6 +46,7 @@
     "start": "gulp start"
   },
   "dependencies": {
+	"ajv": "^5.0.0",
     "fs-jetpack": "^1.0.0",
     "jquery": "^3.2.1",
     "load-json-file": "^3.0.0",

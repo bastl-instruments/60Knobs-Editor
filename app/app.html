@@ -24,13 +24,16 @@
   <span id="knob-container">
   	<div>
   		<select class="type">
-  			<option value="16"></option>
-  			<option value="1" selected="selected">Control Change</option>
+            <option value="16">Disable Knob</option>
+  			<option value="1" selected="selected">CC</option>
+  			<option value="15">CC (specific Channel)</option>
+	        <option value="11">CC with Range</option>
+	        <option value="12">CC with Range (specific Channel)</option>
   			<option value="2">NRPN Biploar</option>
   			<option value="3">NRPN Uniploar</option>
-  			<option value="4">DX7</option>
-  			<option value="15">Control Change (extra Channel)</option>
   			<option value="18">NRPN Exponent</option>
+  			<option value="4">DX7</option>
+
   		</select>
   		<table>
   			<tr>
@@ -49,6 +52,22 @@
   					<input type="number" />
   				</td>
   			</tr>
+			<tr>
+  				<td>
+  					<label></label>
+  				</td>
+  				<td>
+  					<input type="number" />
+  				</td>
+  			</tr>
+			<tr>
+				<td>
+					<label></label>
+				</td>
+				<td>
+					<input type="number" />
+				</td>
+			</tr>
   			<tr>
   				<td>
   					<label>Invert</label>
